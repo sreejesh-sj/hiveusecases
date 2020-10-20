@@ -132,6 +132,19 @@ insert overwrite table cust_delimited_parsed_temp
 select cast(trim(substr(rawdata,1,2)) as int),cast(trim(substr(rawdata,3,12)) as string),cast(trim(substr(rawdata,15,10)) as string),cast(trim(substr(rawdata,25,3)) as int),cast(trim(substr(rawdata,28,10)) as date),
 case when length(trim(substr(rawdata,38,7)))>0 then cast(trim(substr(rawdata,38,7))as int) else 0 end from cust_fixed_raw;
 
+--In MYSQl
+
+create table cust_fixed_mysql(id int, dt date, amt int);
+
+delimiter //
+create procedure sp_cust_delimited_parsed_temp(IN pid int, IN pname varchar(20), IN pcity varchar(20), IN page int, IN pdt date, IN pamt int)
+BEGIN
+INSERT INTO cust_fixed_mysql(id,dt,amt) VALUES(pid, pdt, pamt);
+END //
+delimiter ;
+
+
+or
 
 create table cust_delimited_parsed_temp1(id int,dt date,amt int)
 row format delimited fields terminated by ',';
@@ -140,6 +153,11 @@ insert overwrite table cust_delimited_parsed_temp1 select id, dt, amt from cust_
 
 
 3. Export only id, dt and amt column into a mysql table cust_fixed_mysql using sqoop export.
+
+
+sqoop export --connect jdbc:mysql://localhost/custdb --username root --password root --export-dir hdfs://localhost:54310/user/hive/warehouse/retail.db/cust_delimited_parsed_temp --call sp_cust_delimited_parsed_temp --fields-terminated-by ',' -m 1
+ 
+or 
 
 sqoop export --connect jdbc:mysql://localhost/custdb --username root --password root --table cust_fixed_mysql --export-dir hdfs://localhost:54310/user/hive/warehouse/retail.db/cust_delimited_parsed_temp1 --fields-terminated-by ',' -m 1
 
@@ -201,6 +219,15 @@ ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
 stored as textfile
 location '/user/hduser/custxmljson'
 as select * from xml_bank;
+
+or 
+
+create external table xml_json1(customer_id string, income bigint,demographics map<string,string>, financial map<string,string>)
+ROW FORMAT SERDE 'org.apache.hive.hcatalog.data.JsonSerDe'
+stored as textfile
+location '/user/hduser/custxmljson1';
+
+insert into xml_json1 select * from xml_bank;
 
 
 8. Import data from mysql directly creating static partition based on city=chennai as given below for
