@@ -2,10 +2,6 @@
 
 mkdir /home/hduser/hiveusecase
 
-Download from the link "inceptez.in -> more -> HIVE REALTIME USECASES FOR INTERVIEW
-PREPARATION -> Click here to download the data files for the usecases given below" the
-custpayments_ORIG.sql and payments.txt into /home/hduser/hiveusecase
-
 
 2. Ensure Hadoop, MYSQL, Hive remote metastore is running.
 
